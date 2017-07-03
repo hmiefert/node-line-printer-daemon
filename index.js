@@ -1,5 +1,3 @@
-const LPDaemon	= require('./src/lpdaemon.js');
+let LPDaemon	= require('./src/lpdaemon.js');
 
-module.exports = {
-	LPDaemon : LPDaemon
-};
+module.exports = LPDaemon

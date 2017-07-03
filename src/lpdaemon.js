@@ -94,6 +94,4 @@ function _extractFileName(data) {
         return data.slice(1).toString('utf-8').split(' ')[1] || "unknown";
 };
 
-module.exports = {
-	LPDaemon : LPDaemon
-};
+module.exports = LPDaemon;
