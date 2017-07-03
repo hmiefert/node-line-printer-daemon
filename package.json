@@ -1,11 +1,8 @@
 {
-  "name": "line-printer-daemon",
+  "name": "node-line-printer-daemon",
   "version": "0.0.1",
   "description": "LPD (LinePrinterDaemon) implements the bare minimum of a printserver as described in RFC1179.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": ["LPD","RFC1179","print server","line printer daemon"],
   "author": "hmiefert",
   "license": "MIT",
