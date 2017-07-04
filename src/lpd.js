@@ -67,18 +67,19 @@ class LPDaemon extends EventEmitter {
 			
 			socket.on('close', () => {
 				stream.flush();
-				console.log("Connection closed");
 			});
 
 			socket.on('error', err => {
 				stream.flush();
-				console.log(`An error occured. ErrorObj: ${JSON.stringify(err)}`);
+				console.log(`An error occured: ${JSON.stringify(err)}`);
 			});
 		});		
 	}
 
 	listen(port, ip, cb) {
-		this.daemon.listen(port, ip, cb);
+		let tcpPort	= port	|| 515;
+		let ipAddr	= ip	|| '127.0.0.1';
+		this.daemon.listen(tcpPort, ipAddr, cb);
 	};
 };
 
@@ -92,7 +93,6 @@ function _extractJobOwner(data) {
 
 	lines = data.toString().split('\n');
 	lines.forEach(line => {
-		console.log(`Line: ${line}`);
 
 		switch (line[0]) {
 			case "H":
