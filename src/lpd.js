@@ -1,17 +1,18 @@
 const net		= require('net');
 const EventEmitter	= require('events');
 const Binary		= require('binary');
+const readline		= require('readline');
 
 const ZERO	= new Buffer([0]);
 const NEWLINE	= new Buffer('\n');
 
 class LPDaemon extends EventEmitter {
 
-	constructor(ip, port) {
+	constructor() {
 		super();
 
-		this._tcpPort	= port	|| 515;
-		this._ipAddress	= ip	|| '127.0.0.1';
+		this._tcpPort	= 515;
+		this._ipAddress	= '127.0.0.1';
 
 		this.daemon = net.createServer(socket => {
 			let stream = Binary.stream(socket);
@@ -33,7 +34,8 @@ class LPDaemon extends EventEmitter {
 					stream
 					.buffer('cFile', metadata.cFileLength)
 					.buffer('zero', 1)
-					.tap(cfile => {
+					.tap(data => {
+						metadata.owner = _extractJobOwner(data.cFile);
 						socket.write(ZERO);
 						
 						stream
@@ -41,6 +43,7 @@ class LPDaemon extends EventEmitter {
 						.tap(data => {
 							metadata.dFileLength = _extractFileLength(data.RecieveDataFile);
 							metadata.dFileName = _extractFileName(data.RecieveDataFile);
+							metadata.fileInfo = _extractCleanFileNameAndJobId(data.RecieveDataFile);
 							socket.write(ZERO);
 
 							stream
@@ -74,14 +77,43 @@ class LPDaemon extends EventEmitter {
 		});		
 	}
 
-	listen(cb) {
-		this.daemon.listen(this._tcpPort, this._ipAddress, cb);
+	listen(port, ip, cb) {
+		this.daemon.listen(port, ip, cb);
 	};
 };
 
 function _extractQueueName(data) {
 	let queueName = data.slice(1).toString() || "unknown";
 	return queueName;
+};
+
+function _extractJobOwner(data) {
+	result = {};
+
+	lines = data.toString().split('\n');
+	lines.forEach(line => {
+		console.log(`Line: ${line}`);
+
+		switch (line[0]) {
+			case "H":
+				result.host = line.slice(1);
+				break;
+			case "P":
+				result.owner = line.slice(1);
+				break;
+			case "J":
+				result.fileName = line.slice(1);
+				break;
+			case "Q":
+				result.queueName = line.slice(1);
+				break;
+			case "D":
+				result.dateCreated = line.slice(1);
+				break;
+			};
+	});
+
+	return result;
 };
 
 function _extractFileLength(data) {
@@ -92,6 +124,11 @@ function _extractFileLength(data) {
 
 function _extractFileName(data) {
         return data.slice(1).toString('utf-8').split(' ')[1] || "unknown";
+};
+
+function _extractCleanFileNameAndJobId(data) {
+	let fn = data.slice(1).toString('utf-8').split(' ')[1] || "unknown";
+	return { fileName: fn.slice(6), jobId: fn.slice(3,6) }
 };
 
 module.exports = LPDaemon;

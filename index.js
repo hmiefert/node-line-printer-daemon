@@ -1,3 +1,4 @@
-let LPDaemon	= require('./src/lpdaemon.js');
-
-module.exports = LPDaemon
+let LPDaemon = require('./src/lpd.js');
+module.exports = {
+	LPDaemon
+};
